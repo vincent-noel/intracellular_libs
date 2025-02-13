@@ -58,6 +58,10 @@ jobs:
         
   build_macosx:
     runs-on: macos-13
+    env:
+      CC: gcc-13
+      CXX: g++-13
+      MACOSX_DEPLOYMENT_TARGET: 13.0
     
     steps:
     - uses: actions/checkout@v4
@@ -115,7 +119,11 @@ jobs:
       
   build_macosx_m1:
     runs-on: macos-14
-    
+    env:
+      CC: gcc-14
+      CXX: g++-14
+      MACOSX_DEPLOYMENT_TARGET: 14.0
+      
     steps:
     - uses: actions/checkout@v4
     
