@@ -1,0 +1,287 @@
+name: Build Coin-OR Clp
+
+on:
+  push:
+  release:
+    types: [created]
+    
+jobs:
+
+  build_linux_22:
+    runs-on: ubuntu-22.04
+    
+    steps:
+    - uses: actions/checkout@v4
+    - name: Compile CoinUtils
+      run: |
+        wget https://github.com/coin-or/CoinUtils/archive/refs/tags/releases/2.11.12.tar.gz
+        tar -zxf 2.11.12.tar.gz
+        cd CoinUtils-releases-2.11.12
+        ./configure --enable-static
+        make -j 4
+        sudo make install
+    
+    - name: Compile OSI
+      run: |
+        wget https://github.com/coin-or/Osi/archive/refs/tags/releases/0.108.11.tar.gz
+        tar -zxf 0.108.11.tar.gz
+        cd Osi-releases-0.108.11
+        ./configure --enable-static --with-coinutils-lib=/home/runner/work/intracellular_libs/intracellular_libs/CoinUtils-releases-2.11.12/lib/libCoinUtils.la --with-coinutils-incdir=/home/runner/work/intracellular_libs/intracellular_libs/CoinUtils-releases-2.11.12/include/coin/
+        make -j 4
+        sudo make install
+    
+    - name: Compile Clp
+      run: |
+        wget https://github.com/coin-or/Clp/archive/refs/tags/releases/1.17.10.tar.gz
+        tar -zxf 1.17.10.tar.gz
+        cd Clp-releases-1.17.10
+        ./configure --enable-static \
+          --with-coinutils-lib=/home/runner/work/intracellular_libs/intracellular_libs/CoinUtils-releases-2.11.12/lib/libCoinUtils.la \
+          --with-coinutils-incdir=/home/runner/work/intracellular_libs/intracellular_libs/CoinUtils-releases-2.11.12/include/coin/ \
+          --with-osi-lib=/home/runner/work/intracellular_libs/intracellular_libs/Osi-releases-0.108.11/lib/libOsi.la \
+          --with-osi-incdir=/home/runner/work/intracellular_libs/intracellular_libs/Osi-releases-0.108.11/include/coin/
+        make -j 4
+        sudo make install
+        mkdir package
+        cd package
+        cp -r /home/runner/work/intracellular_libs/intracellular_libs/Clp-releases-1.17.10/lib .
+        cp -r /home/runner/work/intracellular_libs/intracellular_libs/CoinUtils-releases-2.11.12/lib/* lib/
+        cp -r /home/runner/work/intracellular_libs/intracellular_libs/Osi-releases-0.108.11/lib/* lib/
+        cp -r /home/runner/work/intracellular_libs/intracellular_libs/Clp-releases-1.17.10/include .
+        cp -r /home/runner/work/intracellular_libs/intracellular_libs/CoinUtils-releases-2.11.12/include/* include/
+        cp -r /home/runner/work/intracellular_libs/intracellular_libs/Osi-releases-0.108.11/include/* include/
+        tar -zcvf ../Clp-1.17.10-linux64.tar.gz *
+        
+    - uses: actions/upload-artifact@v4
+      with:
+        name: Clp-1.17.10-linux64
+        path: /home/runner/work/intracellular_libs/intracellular_libs/Clp-releases-1.17.10/package/*
+      
+    - uses: actions/upload-release-asset@v1
+      if: github.event_name == 'release'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_name: Clp-1.17.10-linux64.tar.gz
+        asset_path: /home/runner/work/intracellular_libs/intracellular_libs/Clp-releases-1.17.10/Clp-1.17.10-linux64.tar.gz
+        asset_content_type: application/gzip       
+        
+  build_macosx:
+    runs-on: macos-13
+    env:
+      CC: gcc-13
+      CXX: g++-13
+      MACOSX_DEPLOYMENT_TARGET: 13.0
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install dependencies
+      run : |
+        brew install libxml2 openblas lapack
+    
+    - name: Compile CoinUtils
+      run: |
+        wget https://github.com/coin-or/CoinUtils/archive/refs/tags/releases/2.11.12.tar.gz
+        tar -zxf 2.11.12.tar.gz
+        cd CoinUtils-releases-2.11.12
+        ./configure --enable-static
+        make -j 4
+        sudo make install
+    
+    - name: Compile OSI
+      run: |
+        wget https://github.com/coin-or/Osi/archive/refs/tags/releases/0.108.11.tar.gz
+        tar -zxf 0.108.11.tar.gz
+        cd Osi-releases-0.108.11
+        ./configure --enable-static \
+          --with-coinutils-lib=/Users/runner/work/intracellular_libs/intracellular_libs/CoinUtils-releases-2.11.12/lib/libCoinUtils.la \
+          --with-coinutils-incdir=/Users/runner/work/intracellular_libs/intracellular_libs/CoinUtils-releases-2.11.12/include/coin/
+        make -j 4
+        sudo make install
+    
+    - name: Compile Clp
+      run: |
+        wget https://github.com/coin-or/Clp/archive/refs/tags/releases/1.17.10.tar.gz
+        tar -zxf 1.17.10.tar.gz
+        cd Clp-releases-1.17.10
+        ./configure --enable-static \
+          --with-coinutils-lib=/Users/runner/work/intracellular_libs/intracellular_libs/CoinUtils-releases-2.11.12/lib/libCoinUtils.la \
+          --with-coinutils-incdir=/Users/runner/work/intracellular_libs/intracellular_libs/CoinUtils-releases-2.11.12/include/coin/ \
+          --with-osi-lib=/Users/runner/work/intracellular_libs/intracellular_libs/Osi-releases-0.108.11/lib/libOsi.la \
+          --with-osi-incdir=/Users/runner/work/intracellular_libs/intracellular_libs/Osi-releases-0.108.11/include/coin/
+        make -j 4
+        sudo make install
+        mkdir package
+        cd package
+        cp -r /Users/runner/work/intracellular_libs/intracellular_libs/Clp-releases-1.17.10/lib .
+        cp -r /Users/runner/work/intracellular_libs/intracellular_libs/CoinUtils-releases-2.11.12/lib/* lib/
+        cp -r /Users/runner/work/intracellular_libs/intracellular_libs/Osi-releases-0.108.11/lib/* lib/
+        cp -r /Users/runner/work/intracellular_libs/intracellular_libs/Clp-releases-1.17.10/include .
+        cp -r /Users/runner/work/intracellular_libs/intracellular_libs/CoinUtils-releases-2.11.12/include/* include/
+        cp -r /Users/runner/work/intracellular_libs/intracellular_libs/Osi-releases-0.108.11/include/* include/
+        tar -zcvf ../Clp-1.17.10-osx-x86_64.tar.gz *
+        
+    - uses: actions/upload-artifact@v4
+      with:
+        name: Clp-1.17.10-osx-x86_64
+        path: /Users/runner/work/intracellular_libs/intracellular_libs/Clp-releases-1.17.10/package/*
+        
+    - uses: actions/upload-release-asset@v1
+      if: github.event_name == 'release'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_name: Clp-1.17.10-osx-x86_64.tar.gz
+        asset_path: /Users/runner/work/intracellular_libs/intracellular_libs/Clp-releases-1.17.10/Clp-1.17.10-osx-x86_64.tar.gz
+        asset_content_type: application/gzip       
+        
+  build_macosx_m1:
+    runs-on: macos-14
+    env:
+      CC: gcc-14
+      CXX: g++-14
+      MACOSX_DEPLOYMENT_TARGET: 14.0
+      
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install dependencies
+      run : |
+        brew install libxml2 openblas lapack
+    
+    
+    - name: Compile CoinUtils
+      run: |
+        wget https://github.com/coin-or/CoinUtils/archive/refs/tags/releases/2.11.12.tar.gz
+        tar -zxf 2.11.12.tar.gz
+        cd CoinUtils-releases-2.11.12
+        ./configure --enable-static
+        make -j 3
+        sudo make install
+    
+    - name: Compile OSI
+      run: |
+        wget https://github.com/coin-or/Osi/archive/refs/tags/releases/0.108.11.tar.gz
+        tar -zxf 0.108.11.tar.gz
+        cd Osi-releases-0.108.11
+        ./configure --enable-static \
+          --with-coinutils-lib=/Users/runner/work/intracellular_libs/intracellular_libs/CoinUtils-releases-2.11.12/lib/libCoinUtils.la \
+          --with-coinutils-incdir=/Users/runner/work/intracellular_libs/intracellular_libs/CoinUtils-releases-2.11.12/include/coin/
+        make -j 4
+        sudo make install
+      
+    - name: Compile Clp
+      run: |
+        wget https://github.com/coin-or/Clp/archive/refs/tags/releases/1.17.10.tar.gz
+        tar -zxf 1.17.10.tar.gz
+        cd Clp-releases-1.17.10
+        ./configure --enable-static \
+          --with-coinutils-lib=/Users/runner/work/intracellular_libs/intracellular_libs/CoinUtils-releases-2.11.12/lib/libCoinUtils.la \
+          --with-coinutils-incdir=/Users/runner/work/intracellular_libs/intracellular_libs/CoinUtils-releases-2.11.12/include/coin/ \
+          --with-osi-lib=/Users/runner/work/intracellular_libs/intracellular_libs/Osi-releases-0.108.11/lib/libOsi.la \
+          --with-osi-incdir=/Users/runner/work/intracellular_libs/intracellular_libs/Osi-releases-0.108.11/include/coin/
+        make -j 4
+        sudo make install
+        mkdir package
+        cd package
+        cp -r /Users/runner/work/intracellular_libs/intracellular_libs/Clp-releases-1.17.10/lib .
+        cp -r /Users/runner/work/intracellular_libs/intracellular_libs/CoinUtils-releases-2.11.12/lib/* lib/
+        cp -r /Users/runner/work/intracellular_libs/intracellular_libs/Osi-releases-0.108.11/lib/* lib/
+        cp -r /Users/runner/work/intracellular_libs/intracellular_libs/Clp-releases-1.17.10/include .
+        cp -r /Users/runner/work/intracellular_libs/intracellular_libs/CoinUtils-releases-2.11.12/include/* include/
+        cp -r /Users/runner/work/intracellular_libs/intracellular_libs/Osi-releases-0.108.11/include/* include/
+        tar -zcvf ../Clp-1.17.10-osx-arm64.tar.gz *
+        
+    - uses: actions/upload-artifact@v4
+      with:
+        name: Clp-1.17.10-osx-arm64
+        path: /Users/runner/work/intracellular_libs/intracellular_libs/Clp-releases-1.17.10/package/*
+
+    - uses: actions/upload-release-asset@v1
+      if: github.event_name == 'release'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_name: Clp-1.17.10-osx-arm64.tar.gz
+        asset_path: /Users/runner/work/intracellular_libs/intracellular_libs/Clp-releases-1.17.10/Clp-1.17.10-osx-arm64.tar.gz
+        asset_content_type: application/gzip       
+  
+  build_windows:
+    runs-on: windows-latest
+    
+    defaults:
+      run:
+        shell: msys2 {0}
+        
+    steps:
+    - uses: actions/checkout@v4
+    
+    - uses: msys2/setup-msys2@v2
+      with:
+        update: true
+        install: make mingw-w64-x86_64-gcc mingw-w64-x86_64-gcc-libs mingw-w64-x86_64-toolchain mingw-w64-x86_64-python-pip mingw-w64-x86_64-python-numpy mingw-w64-x86_64-lapack mingw-w64-x86_64-openblas mingw-w64-x86_64-libxml2 mingw-w64-x86_64-bzip2 mingw-w64-x86_64-libdeflate mingw-w64-x86_64-blas mingw-w64-x86_64-cblas mingw-w64-x86_64-lapack mingw-w64-x86_64-lapacke
+        
+    
+    - name: Compile CoinUtils
+      run: |
+        wget https://github.com/coin-or/CoinUtils/archive/refs/tags/releases/2.11.12.tar.gz
+        tar -zxf 2.11.12.tar.gz
+        cd CoinUtils-releases-2.11.12
+        ./configure --enable-static --prefix=/d/a/intracellular_libs/intracellular_libs/CoinUtils-releases-2.11.12
+        make -j 4
+        make install
+        
+    - name: Compile OSI
+      run: |
+        wget https://github.com/coin-or/Osi/archive/refs/tags/releases/0.108.11.tar.gz
+        tar -zxf 0.108.11.tar.gz
+        cd Osi-releases-0.108.11
+        ./configure --enable-static \
+          --prefix=/d/a/intracellular_libs/intracellular_libs/Osi-releases-0.108.11 \
+          --with-coinutils-lib=/d/a/intracellular_libs/intracellular_libs/CoinUtils-releases-2.11.12/lib/libCoinUtils.la \
+          --with-coinutils-incdir=/d/a/intracellular_libs/intracellular_libs/CoinUtils-releases-2.11.12/include/coin
+        make -j 4
+        make install
+
+    - name: Compile Clp
+      run: |
+        wget https://github.com/coin-or/Clp/archive/refs/tags/releases/1.17.10.tar.gz
+        tar -zxf 1.17.10.tar.gz
+        cd Clp-releases-1.17.10
+        ./configure --enable-static \
+          --prefix=/d/a/intracellular_libs/intracellular_libs/Clp-releases-1.17.10 \
+          --with-coinutils-lib=/d/a/intracellular_libs/intracellular_libs/CoinUtils-releases-2.11.12/lib/libCoinUtils.la \
+          --with-coinutils-incdir=/d/a/intracellular_libs/intracellular_libs/CoinUtils-releases-2.11.12/include/coin \
+          --with-osi-lib=/d/a/intracellular_libs/intracellular_libs/Osi-releases-0.108.11/lib/libOsi.la \
+          --with-osi-incdir=/d/a/intracellular_libs/intracellular_libs/Osi-releases-0.108.11/include/coin
+        make -j 4
+        make install
+        mkdir package
+        cd package
+        cp -r /d/a/intracellular_libs/intracellular_libs/Clp-releases-1.17.10/lib .
+        cp -r /d/a/intracellular_libs/intracellular_libs/CoinUtils-releases-2.11.12/lib/* lib/
+        cp -r /d/a/intracellular_libs/intracellular_libs/Osi-releases-0.108.11/lib/* lib/
+        cp -r /d/a/intracellular_libs/intracellular_libs/Clp-releases-1.17.10/include .
+        cp -r /d/a/intracellular_libs/intracellular_libs/CoinUtils-releases-2.11.12/include/* include/
+        cp -r /d/a/intracellular_libs/intracellular_libs/Osi-releases-0.108.11/include/* include/
+        tar -zcvf ../Clp-1.17.10-win64.tar.gz *
+        
+    - uses: actions/upload-artifact@v4
+      with:
+        name: Clp-1.17.10-win64
+        path: D:\a\intracellular_libs\intracellular_libs\Clp-releases-1.17.10\package\*
+        
+    - uses: actions/upload-release-asset@v1
+      if: github.event_name == 'release'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_name: Clp-1.17.10-win64.tar.gz
+        asset_path: D:\a\intracellular_libs\intracellular_libs\Clp-releases-1.17.10\Clp-1.17.10-win64.tar.gz
+        asset_content_type: application/gzip       
+  

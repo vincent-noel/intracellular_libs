@@ -1,0 +1,258 @@
+name: Build libsbml
+
+on:
+  push:
+  release:
+    types: [created]
+    
+jobs:
+
+  build_linux_22:
+    runs-on: ubuntu-22.04
+    
+    steps:
+    - uses: actions/checkout@v4
+    - name: Compile libSBML
+      run: |
+        wget https://github.com/sbmlteam/libsbml/archive/refs/tags/v5.20.4.tar.gz
+        tar -zxf v5.20.4.tar.gz
+        cd libsbml-5.20.4
+        mkdir build
+        cd build
+        cmake -DCMAKE_INSTALL_PREFIX=/usr \
+        -DCMAKE_INSTALL_LIBDIR=/usr/lib \
+        -DCMAKE_CXX_COMPILER=g++ \
+        -DCMAKE_C_COMPILER=gcc \
+        -DCMAKE_CXX_STANDARD_LIBRARIES=-lxml2 \
+        -DWITH_SWIG=OFF \
+        -DLIBXML_LIBRARY=/usr/lib/x86_64-linux-gnu/libxml2.so \
+        -DLIBXML_INCLUDE_DIR=/usr/include/libxml2 \
+        -DENABLE_COMP=ON \
+        -DENABLE_FBC=ON \
+        -DENABLE_GROUPS=ON \
+        -DENABLE_LAYOUT=ON \
+        -DENABLE_MULTI=ON \
+        -DENABLE_QUAL=ON \
+        -DENABLE_RENDER=ON \
+        -DENABLE_DISTRIB=ON \
+        -DWITH_CPP_NAMESPACE=ON \
+        ..
+        make -j 4
+        sudo make install
+        cd ..
+        mkdir package
+        cd package
+        mkdir lib
+        cp /usr/lib/libsbml* lib/
+        mkdir include
+        cp -r /usr/include/sbml/ include/
+        tar -zcvf ../libSBML-5.20.4-linux64.tar.gz *
+      
+    - uses: actions/upload-artifact@v4
+      with:
+        name: libSBML-5.20.4-linux64
+        path: /home/runner/work/intracellular_libs/intracellular_libs/libsbml-5.20.4/package/*
+          
+      
+    - uses: actions/upload-release-asset@v1
+      if: github.event_name == 'release'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_name: libSBML-5.20.4-linux64.tar.gz
+        asset_path: /home/runner/work/intracellular_libs/intracellular_libs/libsbml-5.20.4/libSBML-5.20.4-linux64.tar.gz
+        asset_content_type: application/gzip   
+               
+  build_macosx:
+    runs-on: macos-13
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install dependencies
+      run : |
+        brew install libxml2
+      
+    - name: Compile libSBML
+      env: 
+        MACOSX_DEPLOYMENT_TARGET: 13.0
+      run: |
+        wget https://github.com/sbmlteam/libsbml/archive/refs/tags/v5.20.4.tar.gz
+        tar -zxf v5.20.4.tar.gz
+        cd libsbml-5.20.4
+        mkdir build
+        cd build
+        cmake -DCMAKE_INSTALL_PREFIX=/usr/local/ \
+        -DCMAKE_INSTALL_LIBDIR=/usr/local/lib/ \
+        -DCMAKE_CXX_COMPILER=g++-12 \
+        -DCMAKE_C_COMPILER=gcc-12 \
+        -DCMAKE_CXX_STANDARD_LIBRARIES=-lxml2 \
+        -DWITH_SWIG=OFF \
+        -DLIBXML_LIBRARY=/usr/local/opt/libxml2/lib/libxml2.2.dylib \
+        -DLIBXML_INCLUDE_DIR=/usr/local/opt/libxml2/include/libxml2 \
+        -DENABLE_COMP=ON \
+        -DENABLE_FBC=ON \
+        -DENABLE_GROUPS=ON \
+        -DENABLE_LAYOUT=ON \
+        -DENABLE_MULTI=ON \
+        -DENABLE_QUAL=ON \
+        -DENABLE_RENDER=ON \
+        -DENABLE_DISTRIB=ON \
+        -DWITH_CPP_NAMESPACE=ON \
+        ..
+        make -j 4
+        sudo make install
+        cd ..
+        mkdir package
+        cd package
+        mkdir lib
+        cp /usr/local/lib/libsbml* lib/
+        mkdir include
+        cp -r /usr/local/include/sbml include/
+        tar -zcvf ../libSBML-5.20.4-osx-x86_64.tar.gz *
+
+    - uses: actions/upload-artifact@v4
+      with:
+        name: libSBML-5.20.4-osx-x86_64
+        path: /Users/runner/work/intracellular_libs/intracellular_libs/libsbml-5.20.4/package/*
+        
+      
+    - uses: actions/upload-release-asset@v1
+      if: github.event_name == 'release'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_name: libSBML-5.20.4-osx-x86_64.tar.gz
+        asset_path: /Users/runner/work/intracellular_libs/intracellular_libs/libsbml-5.20.4/libSBML-5.20.4-osx-x86_64.tar.gz
+        asset_content_type: application/gzip   
+        
+  build_macosx_m1:
+    runs-on: macos-14
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install dependencies
+      run : |
+        brew install libxml2
+    
+    - name: Compile libSBML
+      env: 
+        MACOSX_DEPLOYMENT_TARGET: 14.0
+      run: |
+        wget https://github.com/sbmlteam/libsbml/archive/refs/tags/v5.20.4.tar.gz
+        tar -zxf v5.20.4.tar.gz
+        cd libsbml-5.20.4
+        mkdir build
+        cd build
+        cmake -DCMAKE_INSTALL_PREFIX=/usr/local/ \
+        -DCMAKE_INSTALL_LIBDIR=/usr/local/lib/ \
+        -DCMAKE_CXX_COMPILER=g++-13 \
+        -DCMAKE_C_COMPILER=gcc-13 \
+        -DCMAKE_CXX_STANDARD_LIBRARIES=-lxml2 \
+        -DWITH_SWIG=OFF \
+        -DLIBXML_LIBRARY=/opt/homebrew/opt/libxml2/lib/libxml2.2.dylib \
+        -DLIBXML_INCLUDE_DIR=/opt/homebrew/opt/libxml2/include/libxml2/ \
+        -DENABLE_COMP=ON \
+        -DENABLE_FBC=ON \
+        -DENABLE_GROUPS=ON \
+        -DENABLE_LAYOUT=ON \
+        -DENABLE_MULTI=ON \
+        -DENABLE_QUAL=ON \
+        -DENABLE_RENDER=ON \
+        -DENABLE_DISTRIB=ON \
+        -DWITH_CPP_NAMESPACE=ON \
+        ..
+        make -j 3
+        sudo make install
+        cd ..
+        mkdir package
+        cd package
+        mkdir lib
+        cp /usr/local/lib/libsbml* lib/
+        mkdir include
+        cp -r /usr/local/include/sbml include/
+        tar -zcvf ../libSBML-5.20.4-osx-arm64.tar.gz *
+        
+    - uses: actions/upload-artifact@v4
+      with:
+        name: libSBML-5.20.4-osx-arm64
+        path: /Users/runner/work/intracellular_libs/intracellular_libs/libsbml-5.20.4/package/*
+        
+    - uses: actions/upload-release-asset@v1
+      if: github.event_name == 'release'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_name: libSBML-5.20.4-osx-arm64.tar.gz
+        asset_path: /Users/runner/work/intracellular_libs/intracellular_libs/libsbml-5.20.4/libSBML-5.20.4-osx-arm64.tar.gz
+        asset_content_type: application/gzip   
+                        
+  build_windows:
+    runs-on: windows-latest
+    
+    defaults:
+      run:
+        shell: msys2 {0}
+        
+    steps:
+    - uses: actions/checkout@v4
+    
+    - uses: msys2/setup-msys2@v2
+      with:
+        update: true
+        install: flex bison make gcc diffutils mingw-w64-x86_64-toolchain mingw-w64-x86_64-python-pip mingw-w64-x86_64-python-numpy mingw-w64-x86_64-lapack mingw-w64-x86_64-openblas mingw-w64-x86_64-libxml2 mingw-w64-x86_64-cmake
+        
+    - name: Compiling libSBML
+      run: |
+        wget https://github.com/sbmlteam/libsbml/archive/refs/tags/v5.20.4.tar.gz
+        tar -zxf v5.20.4.tar.gz
+        cd libsbml-5.20.4
+        mkdir build
+        cd build
+        cmake  -G"MSYS Makefiles" \
+          -DCMAKE_INSTALL_PREFIX=/mingw64/ \
+          -DCMAKE_INSTALL_LIBDIR=/mingw64/lib \
+          -DCMAKE_CXX_COMPILER=g++ \
+          -DCMAKE_C_COMPILER=gcc \
+          -DCMAKE_CXX_STANDARD_LIBRARIES=-lxml2 \
+          -DWITH_SWIG=OFF \
+          -DLIBXML_LIBRARY=/mingw64/lib/libxml2.dll.a \
+          -DLIBXML_INCLUDE_DIR=/mingw64/include/libxml2 \
+          -DENABLE_COMP=ON \
+          -DENABLE_FBC=ON \
+          -DENABLE_GROUPS=ON \
+          -DENABLE_LAYOUT=ON \
+          -DENABLE_MULTI=ON \
+          -DENABLE_QUAL=ON \
+          -DENABLE_RENDER=ON \
+          -DENABLE_DISTRIB=ON \
+          ..
+        make 
+        make install
+        cd ..
+        mkdir package
+        cd package
+        mkdir lib
+        cp D:/a/_temp/msys64/mingw64/lib/libsbml* lib/
+        mkdir include
+        cp -r D:/a/_temp/msys64/mingw64/include/sbml/ include/
+        tar -zcvf ../libSBML-5.20.4-win64.tar.gz *
+        
+    - uses: actions/upload-artifact@v4
+      with:
+        name: libSBML-5.20.4-win64
+        path: D:\a\intracellular_libs\intracellular_libs/libsbml-5.20.4/package/*
+        
+    - uses: actions/upload-release-asset@v1
+      if: github.event_name == 'release'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_name: libSBML-5.20.4-win64.tar.gz
+        asset_path: D:\a\intracellular_libs\intracellular_libs\libsbml-5.20.4\libSBML-5.20.4-win64.tar.gz
+        asset_content_type: application/gzip     
