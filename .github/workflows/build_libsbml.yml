@@ -20,9 +20,9 @@ jobs:
     - uses: actions/checkout@v4
     - name: Compile libSBML
       run: |
-        wget https://github.com/sbmlteam/libsbml/archive/refs/tags/v5.20.4.tar.gz
-        tar -zxf v5.20.4.tar.gz
-        cd libsbml-5.20.4
+        wget https://github.com/sbmlteam/libsbml/archive/refs/tags/v5.20.5.tar.gz
+        tar -zxf v5.20.5.tar.gz
+        cd libsbml-5.20.5
         mkdir build
         cd build
         cmake -DCMAKE_INSTALL_PREFIX=/usr \
@@ -53,7 +53,7 @@ jobs:
         cp /usr/lib/libsbml* lib/
         mkdir include
         cp -r /usr/include/sbml/ include/
-        tar -zcvf ../libSBML-5.20.4-linux64.tar.gz *
+        tar -zcvf ../libSBML-5.20.5-linux64.tar.gz *
       
         
     - name: Inspect libraries
@@ -63,8 +63,8 @@ jobs:
         
     - uses: actions/upload-artifact@v4
       with:
-        name: libSBML-5.20.4-linux64
-        path: /home/runner/work/intracellular_libs/intracellular_libs/libsbml-5.20.4/package/*
+        name: libSBML-5.20.5-linux64
+        path: /home/runner/work/intracellular_libs/intracellular_libs/libsbml-5.20.5/package/*
           
       
     - uses: actions/upload-release-asset@v1
@@ -73,8 +73,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ github.event.release.upload_url }}
-        asset_name: libSBML-5.20.4-linux64.tar.gz
-        asset_path: /home/runner/work/intracellular_libs/intracellular_libs/libsbml-5.20.4/libSBML-5.20.4-linux64.tar.gz
+        asset_name: libSBML-5.20.5-linux64.tar.gz
+        asset_path: /home/runner/work/intracellular_libs/intracellular_libs/libsbml-5.20.5/libSBML-5.20.5-linux64.tar.gz
         asset_content_type: application/gzip   
                
   build_macosx:
@@ -91,9 +91,9 @@ jobs:
       env: 
         MACOSX_DEPLOYMENT_TARGET: 13.0
       run: |
-        wget https://github.com/sbmlteam/libsbml/archive/refs/tags/v5.20.4.tar.gz
-        tar -zxf v5.20.4.tar.gz
-        cd libsbml-5.20.4
+        wget https://github.com/sbmlteam/libsbml/archive/refs/tags/v5.20.5.tar.gz
+        tar -zxf v5.20.5.tar.gz
+        cd libsbml-5.20.5
         mkdir build
         cd build
         cmake -DCMAKE_INSTALL_PREFIX=/usr/local/ \
@@ -123,12 +123,12 @@ jobs:
         cp /usr/local/lib/libsbml* lib/
         mkdir include
         cp -r /usr/local/include/sbml include/
-        tar -zcvf ../libSBML-5.20.4-osx-x86_64.tar.gz *
+        tar -zcvf ../libSBML-5.20.5-osx-x86_64.tar.gz *
 
     - uses: actions/upload-artifact@v4
       with:
-        name: libSBML-5.20.4-osx-x86_64
-        path: /Users/runner/work/intracellular_libs/intracellular_libs/libsbml-5.20.4/package/*
+        name: libSBML-5.20.5-osx-x86_64
+        path: /Users/runner/work/intracellular_libs/intracellular_libs/libsbml-5.20.5/package/*
         
       
     - uses: actions/upload-release-asset@v1
@@ -137,8 +137,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ github.event.release.upload_url }}
-        asset_name: libSBML-5.20.4-osx-x86_64.tar.gz
-        asset_path: /Users/runner/work/intracellular_libs/intracellular_libs/libsbml-5.20.4/libSBML-5.20.4-osx-x86_64.tar.gz
+        asset_name: libSBML-5.20.5-osx-x86_64.tar.gz
+        asset_path: /Users/runner/work/intracellular_libs/intracellular_libs/libsbml-5.20.5/libSBML-5.20.5-osx-x86_64.tar.gz
         asset_content_type: application/gzip   
         
   build_macosx_m1:
@@ -155,9 +155,9 @@ jobs:
       env: 
         MACOSX_DEPLOYMENT_TARGET: 14.0
       run: |
-        wget https://github.com/sbmlteam/libsbml/archive/refs/tags/v5.20.4.tar.gz
-        tar -zxf v5.20.4.tar.gz
-        cd libsbml-5.20.4
+        wget https://github.com/sbmlteam/libsbml/archive/refs/tags/v5.20.5.tar.gz
+        tar -zxf v5.20.5.tar.gz
+        cd libsbml-5.20.5
         mkdir build
         cd build
         cmake -DCMAKE_INSTALL_PREFIX=/usr/local/ \
@@ -187,12 +187,12 @@ jobs:
         cp /usr/local/lib/libsbml* lib/
         mkdir include
         cp -r /usr/local/include/sbml include/
-        tar -zcvf ../libSBML-5.20.4-osx-arm64.tar.gz *
+        tar -zcvf ../libSBML-5.20.5-osx-arm64.tar.gz *
         
     - uses: actions/upload-artifact@v4
       with:
-        name: libSBML-5.20.4-osx-arm64
-        path: /Users/runner/work/intracellular_libs/intracellular_libs/libsbml-5.20.4/package/*
+        name: libSBML-5.20.5-osx-arm64
+        path: /Users/runner/work/intracellular_libs/intracellular_libs/libsbml-5.20.5/package/*
         
     - uses: actions/upload-release-asset@v1
       if: github.event_name == 'release'
@@ -200,8 +200,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ github.event.release.upload_url }}
-        asset_name: libSBML-5.20.4-osx-arm64.tar.gz
-        asset_path: /Users/runner/work/intracellular_libs/intracellular_libs/libsbml-5.20.4/libSBML-5.20.4-osx-arm64.tar.gz
+        asset_name: libSBML-5.20.5-osx-arm64.tar.gz
+        asset_path: /Users/runner/work/intracellular_libs/intracellular_libs/libsbml-5.20.5/libSBML-5.20.5-osx-arm64.tar.gz
         asset_content_type: application/gzip   
                         
   build_windows:
@@ -221,9 +221,9 @@ jobs:
         
     - name: Compiling libSBML
       run: |
-        wget https://github.com/sbmlteam/libsbml/archive/refs/tags/v5.20.4.tar.gz
-        tar -zxf v5.20.4.tar.gz
-        cd libsbml-5.20.4
+        wget https://github.com/sbmlteam/libsbml/archive/refs/tags/v5.20.5.tar.gz
+        tar -zxf v5.20.5.tar.gz
+        cd libsbml-5.20.5
         mkdir build
         cd build
         cmake  -G"MSYS Makefiles" \
@@ -253,12 +253,12 @@ jobs:
         cp D:/a/_temp/msys64/mingw64/lib/libsbml* lib/
         mkdir include
         cp -r D:/a/_temp/msys64/mingw64/include/sbml/ include/
-        tar -zcvf ../libSBML-5.20.4-win64.tar.gz *
+        tar -zcvf ../libSBML-5.20.5-win64.tar.gz *
         
     - uses: actions/upload-artifact@v4
       with:
-        name: libSBML-5.20.4-win64
-        path: D:\a\intracellular_libs\intracellular_libs/libsbml-5.20.4/package/*
+        name: libSBML-5.20.5-win64
+        path: D:\a\intracellular_libs\intracellular_libs/libsbml-5.20.5/package/*
         
     - uses: actions/upload-release-asset@v1
       if: github.event_name == 'release'
@@ -266,6 +266,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ github.event.release.upload_url }}
-        asset_name: libSBML-5.20.4-win64.tar.gz
-        asset_path: D:\a\intracellular_libs\intracellular_libs\libsbml-5.20.4\libSBML-5.20.4-win64.tar.gz
+        asset_name: libSBML-5.20.5-win64.tar.gz
+        asset_path: D:\a\intracellular_libs\intracellular_libs\libsbml-5.20.5\libSBML-5.20.5-win64.tar.gz
         asset_content_type: application/gzip     
