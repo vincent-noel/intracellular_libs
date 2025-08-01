@@ -42,6 +42,7 @@ jobs:
         -DENABLE_RENDER=ON \
         -DENABLE_DISTRIB=ON \
         -DWITH_CPP_NAMESPACE=ON \
+        -DBUILD_SHARED_LIBS=OFF \
         ..
         make -j 4
         sudo make install
