@@ -53,11 +53,11 @@ jobs:
         cp /usr/lib/libsbml* lib/
         mkdir include
         cp -r /usr/include/sbml/ include/
-        tar -zcvf ../libSBML-5.20.5-linux64.tar.gz *
-        
+        tar -zcvf ../libSBML-5.20.5-linux64-glibc${{ matrix.os.glibc }}.tar.gz *
+
     - uses: actions/upload-artifact@v4
       with:
-        name: libSBML-5.20.5-linux64
+        name: libSBML-5.20.5-linux64-glibc${{ matrix.os.glibc }}
         path: /home/runner/work/intracellular_libs/intracellular_libs/libsbml-5.20.5/package/*
           
       
@@ -67,8 +67,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ github.event.release.upload_url }}
-        asset_name: libSBML-5.20.5-linux64.tar.gz
-        asset_path: /home/runner/work/intracellular_libs/intracellular_libs/libsbml-5.20.5/libSBML-5.20.5-linux64.tar.gz
+        asset_name: libSBML-5.20.5-linux64-glibc${{ matrix.os.glibc }}.tar.gz
+        asset_path: /home/runner/work/intracellular_libs/intracellular_libs/libsbml-5.20.5/libSBML-5.20.5-linux64-glibc${{ matrix.os.glibc }}.tar.gz
         asset_content_type: application/gzip   
                
   build_macosx:

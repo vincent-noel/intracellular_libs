@@ -8,7 +8,13 @@ on:
 jobs:
 
   build_linux_22:
-    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        os: [
+          {image: ubuntu-22.04, glibc: "2.35"},
+          {image: ubuntu-24.04, glibc: "2.39"}
+        ]
+    runs-on: ${{ matrix.os.image }}
     
     steps:
     - uses: actions/checkout@v4
@@ -51,15 +57,20 @@ jobs:
         cp -r /home/runner/work/intracellular_libs/intracellular_libs/CoinUtils-releases-2.11.12/include/* include/
         cp -r /home/runner/work/intracellular_libs/intracellular_libs/Osi-releases-0.108.11/include/* include/
         tar -zcvf ../Clp-1.17.10-linux64.tar.gz *
-            
+        
+    - uses: actions/upload-artifact@v4
+      with:
+        name: Clp-1.17.10-linux64-glibc${{ matrix.os.glibc }}
+        path: /home/runner/work/intracellular_libs/intracellular_libs/Clp-releases-1.17.10/package/*
+          
     - uses: actions/upload-release-asset@v1
       if: github.event_name == 'release'
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ github.event.release.upload_url }}
-        asset_name: Clp-1.17.10-linux64.tar.gz
-        asset_path: /home/runner/work/intracellular_libs/intracellular_libs/Clp-releases-1.17.10/Clp-1.17.10-linux64.tar.gz
+        asset_name: Clp-1.17.10-linux64-glibc${{ matrix.os.glibc }}.tar.gz
+        asset_path: /home/runner/work/intracellular_libs/intracellular_libs/Clp-releases-1.17.10/Clp-1.17.10-linux64-glibc${{ matrix.os.glibc }}.tar.gz
         asset_content_type: application/gzip       
         
   build_macosx:
