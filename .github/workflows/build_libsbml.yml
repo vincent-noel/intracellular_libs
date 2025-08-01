@@ -18,6 +18,22 @@ jobs:
     
     steps:
     - uses: actions/checkout@v4
+    
+    - name: Compile libSBML dependencies
+      run: |
+        git clone --recurse-submodules https://github.com/fbergmann/libSEDML.git
+        cd libSEDML/submodules/libSBML-dependencies
+        cmake -B build -S . \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_INSTALL_PREFIX=/usr \
+          -DWITH_LIBXML=ON \
+          -DWITH_ZLIB=ON \
+          -DWITH_ICONV=ON \
+          -DWITH_BZIP2=ON \
+          -DLIBXML2_WITH_ZLIB=ON
+        cmake --build build --parallel 4
+        cmake --install build
+    
     - name: Compile libSBML
       run: |
         wget https://github.com/sbmlteam/libsbml/archive/refs/tags/v5.20.5.tar.gz
@@ -77,10 +93,21 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
-    - name: Install dependencies
-      run : |
-        brew install libxml2
-      
+    - name: Compile libSBML dependencies
+      run: |
+        git clone --recurse-submodules https://github.com/fbergmann/libSEDML.git
+        cd libSEDML/submodules/libSBML-dependencies
+        cmake -B build -S . \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_INSTALL_PREFIX=/usr \
+          -DWITH_LIBXML=ON \
+          -DWITH_ZLIB=ON \
+          -DWITH_ICONV=ON \
+          -DWITH_BZIP2=ON \
+          -DLIBXML2_WITH_ZLIB=ON
+        cmake --build build --parallel 4
+        cmake --install build
+          
     - name: Compile libSBML
       env: 
         MACOSX_DEPLOYMENT_TARGET: 13.0
@@ -142,9 +169,20 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
-    - name: Install dependencies
-      run : |
-        brew install libxml2
+    - name: Compile libSBML dependencies
+      run: |
+        git clone --recurse-submodules https://github.com/fbergmann/libSEDML.git
+        cd libSEDML/submodules/libSBML-dependencies
+        cmake -B build -S . \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_INSTALL_PREFIX=/usr \
+          -DWITH_LIBXML=ON \
+          -DWITH_ZLIB=ON \
+          -DWITH_ICONV=ON \
+          -DWITH_BZIP2=ON \
+          -DLIBXML2_WITH_ZLIB=ON
+        cmake --build build --parallel 4
+        cmake --install build
     
     - name: Compile libSBML
       env: 
@@ -214,6 +252,22 @@ jobs:
       with:
         update: true
         install: flex bison make gcc diffutils mingw-w64-x86_64-toolchain mingw-w64-x86_64-python-pip mingw-w64-x86_64-python-numpy mingw-w64-x86_64-lapack mingw-w64-x86_64-openblas mingw-w64-x86_64-libxml2 mingw-w64-x86_64-cmake
+    
+    - name: Compile libSBML dependencies
+      run: |
+        git clone --recurse-submodules https://github.com/fbergmann/libSEDML.git
+        cd libSEDML/submodules/libSBML-dependencies
+        cmake -G"MSYS Makefiles" -B build -S . \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_INSTALL_PREFIX=/usr \
+          -DWITH_LIBXML=ON \
+          -DWITH_ZLIB=ON \
+          -DWITH_ICONV=ON \
+          -DWITH_BZIP2=ON \
+          -DLIBXML2_WITH_ZLIB=ON
+        cmake --build build --parallel 4
+        cmake --install build
+    
         
     - name: Compiling libSBML
       run: |
