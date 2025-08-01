@@ -122,7 +122,12 @@ jobs:
         cp -r /Users/runner/work/intracellular_libs/intracellular_libs/CoinUtils-releases-2.11.12/include/* include/
         cp -r /Users/runner/work/intracellular_libs/intracellular_libs/Osi-releases-0.108.11/include/* include/
         tar -zcvf ../Clp-1.17.10-osx-x86_64.tar.gz *
-        
+    
+    - name: Inspect libraries
+      run: |
+        ldd /usr/lib/libClp.a
+        readelf -d /usr/lib/libClp.a | grep NEEDED
+
     - uses: actions/upload-artifact@v4
       with:
         name: Clp-1.17.10-osx-x86_64
