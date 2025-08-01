@@ -18,6 +18,23 @@ jobs:
     
     steps:
     - uses: actions/checkout@v4
+    
+    - name: Compile libSBML dependencies
+      run: |
+        git clone --recurse-submodules https://github.com/sbmlteam/libSBML-dependencies.git
+        cd libSBML-dependencies
+        cmake -B build -S . \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_INSTALL_PREFIX=/usr \
+          -DWITH_LIBXML=ON \
+          -DWITH_ZLIB=ON \
+          -DWITH_ICONV=ON \
+          -DWITH_BZIP2=ON \
+          -DWITH_CHECK=OFF \
+          -DLIBXML2_WITH_ZLIB=ON
+        cmake --build build --parallel 4
+        sudo cmake --install build
+    
     - name: Compile libSBML
       run: |
         wget https://github.com/sbmlteam/libsbml/archive/refs/tags/v5.20.5.tar.gz
@@ -31,7 +48,7 @@ jobs:
         -DCMAKE_C_COMPILER=gcc \
         -DCMAKE_CXX_STANDARD_LIBRARIES=-lxml2 \
         -DWITH_SWIG=OFF \
-        -DLIBXML_LIBRARY=/usr/lib/x86_64-linux-gnu/libxml2.so \
+        -DLIBXML_LIBRARY=/usr/lib/x86_64-linux-gnu/libxml2.a \
         -DLIBXML_INCLUDE_DIR=/usr/include/libxml2 \
         -DENABLE_COMP=ON \
         -DENABLE_FBC=ON \
@@ -50,7 +67,8 @@ jobs:
         mkdir package
         cd package
         mkdir lib
-        cp /usr/lib/libsbml* lib/
+        cp /usr/lib/libsbml-static.a /usr/lib/libzlib.a /usr/lib/libbz2.a /usr/lib/x86_64-linux-gnu/libxml2.a lib/
+        
         mkdir include
         cp -r /usr/include/sbml/ include/
         tar -zcvf ../libSBML-5.20.5-linux64-glibc${{ matrix.os.glibc }}.tar.gz *
@@ -77,10 +95,24 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
-    - name: Install dependencies
-      run : |
-        brew install libxml2
-      
+    - name: Compile libSBML dependencies
+      run: |
+        git clone --recurse-submodules https://github.com/sbmlteam/libSBML-dependencies.git
+        cd libSBML-dependencies
+        cmake -B build -S . \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_CXX_COMPILER=g++-12 \
+          -DCMAKE_C_COMPILER=gcc-12 \
+          -DCMAKE_INSTALL_PREFIX=/usr/local/ \
+          -DWITH_LIBXML=ON \
+          -DWITH_ZLIB=ON \
+          -DWITH_ICONV=ON \
+          -DWITH_BZIP2=ON \
+          -DWITH_CHECK=OFF \
+          -DLIBXML2_WITH_ZLIB=ON
+        cmake --build build --parallel 4
+        sudo cmake --install build
+          
     - name: Compile libSBML
       env: 
         MACOSX_DEPLOYMENT_TARGET: 13.0
@@ -96,8 +128,8 @@ jobs:
         -DCMAKE_C_COMPILER=gcc-12 \
         -DCMAKE_CXX_STANDARD_LIBRARIES=-lxml2 \
         -DWITH_SWIG=OFF \
-        -DLIBXML_LIBRARY=/usr/local/opt/libxml2/lib/libxml2.2.dylib \
-        -DLIBXML_INCLUDE_DIR=/usr/local/opt/libxml2/include/libxml2 \
+        -DLIBXML_LIBRARY=/usr/local/lib/libxml2.a \
+        -DLIBXML_INCLUDE_DIR=/usr/local/include/libxml2 \
         -DENABLE_COMP=ON \
         -DENABLE_FBC=ON \
         -DENABLE_GROUPS=ON \
@@ -115,7 +147,7 @@ jobs:
         mkdir package
         cd package
         mkdir lib
-        cp /usr/local/lib/libsbml* lib/
+        cp /usr/local/lib/libsbml-static.a /usr/local/lib/libzlib.a /usr/local/lib/libbz2.a /usr/local/lib/libxml2.a lib/
         mkdir include
         cp -r /usr/local/include/sbml include/
         tar -zcvf ../libSBML-5.20.5-osx-x86_64.tar.gz *
@@ -142,9 +174,23 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
-    - name: Install dependencies
-      run : |
-        brew install libxml2
+    - name: Compile libSBML dependencies
+      run: |
+        git clone --recurse-submodules https://github.com/sbmlteam/libSBML-dependencies
+        cd libSBML-dependencies
+        cmake -B build -S . \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_INSTALL_PREFIX=/usr/local \
+          -DCMAKE_CXX_COMPILER=g++-13 \
+          -DCMAKE_C_COMPILER=gcc-13 \
+          -DWITH_LIBXML=ON \
+          -DWITH_ZLIB=ON \
+          -DWITH_ICONV=ON \
+          -DWITH_BZIP2=ON \
+          -DWITH_CHECK=OFF \
+          -DLIBXML2_WITH_ZLIB=ON
+        cmake --build build --parallel 4
+        sudo cmake --install build
     
     - name: Compile libSBML
       env: 
@@ -161,8 +207,8 @@ jobs:
         -DCMAKE_C_COMPILER=gcc-13 \
         -DCMAKE_CXX_STANDARD_LIBRARIES=-lxml2 \
         -DWITH_SWIG=OFF \
-        -DLIBXML_LIBRARY=/opt/homebrew/opt/libxml2/lib/libxml2.2.dylib \
-        -DLIBXML_INCLUDE_DIR=/opt/homebrew/opt/libxml2/include/libxml2/ \
+        -DLIBXML_LIBRARY=/usr/local/lib/libxml2.a \
+        -DLIBXML_INCLUDE_DIR=/usr/local/include/libxml2/ \
         -DENABLE_COMP=ON \
         -DENABLE_FBC=ON \
         -DENABLE_GROUPS=ON \
@@ -180,7 +226,7 @@ jobs:
         mkdir package
         cd package
         mkdir lib
-        cp /usr/local/lib/libsbml* lib/
+        cp /usr/local/lib/libsbml-static.a /usr/local/lib/libzlib.a /usr/local/lib/libbz2.a /usr/local/lib/libxml2.a lib/
         mkdir include
         cp -r /usr/local/include/sbml include/
         tar -zcvf ../libSBML-5.20.5-osx-arm64.tar.gz *
@@ -213,7 +259,24 @@ jobs:
     - uses: msys2/setup-msys2@v2
       with:
         update: true
-        install: flex bison make gcc diffutils mingw-w64-x86_64-toolchain mingw-w64-x86_64-python-pip mingw-w64-x86_64-python-numpy mingw-w64-x86_64-lapack mingw-w64-x86_64-openblas mingw-w64-x86_64-libxml2 mingw-w64-x86_64-cmake
+        install: flex bison make git mingw-w64-x86_64-binutils mingw-w64-x86_64-gcc mingw-w64-x86_64-headers-git mingw-w64-x86_64-gcc-libs mingw-w64-x86_64-libwinpthread-git mingw-w64-x86_64-lapack mingw-w64-x86_64-openblas mingw-w64-x86_64-libxml2 mingw-w64-x86_64-bzip2 mingw-w64-x86_64-python mingw-w64-x86_64-python-zstandard mingw-w64-x86_64-python-cffi make bison flex mingw-w64-x86_64-ca-certificates mingw-w64-x86_64-diffutils mingw-w64-x86_64-python-pip mingw-w64-x86_64-python-numpy mingw-w64-x86_64-lapack mingw-w64-x86_64-openblas mingw-w64-x86_64-cmake mingw-w64-x86_64-tools-git
+    
+    - name: Compile libSBML dependencies
+      run: |
+        git clone --recurse-submodules https://github.com/sbmlteam/libSBML-dependencies.git
+        cd libSBML-dependencies
+        cmake -G"MSYS Makefiles" -B build -S . \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_INSTALL_PREFIX=/mingw64 \
+          -DWITH_LIBXML=ON \
+          -DWITH_ZLIB=ON \
+          -DWITH_ICONV=ON \
+          -DWITH_BZIP2=ON \
+          -DWITH_CHECK=OFF \
+          -DLIBXML2_WITH_ZLIB=ON
+        cmake --build build --parallel 4
+        cmake --install build
+    
         
     - name: Compiling libSBML
       run: |
@@ -234,7 +297,7 @@ jobs:
           -DCMAKE_C_COMPILER=gcc \
           -DCMAKE_CXX_STANDARD_LIBRARIES=-lxml2 \
           -DWITH_SWIG=OFF \
-          -DLIBXML_LIBRARY=/mingw64/lib/libxml2.dll.a \
+          -DLIBXML_LIBRARY=/mingw64/lib/libxml2.a \
           -DLIBXML_INCLUDE_DIR=/mingw64/include/libxml2 \
           -DENABLE_COMP=ON \
           -DENABLE_FBC=ON \
@@ -252,7 +315,7 @@ jobs:
         mkdir package
         cd package
         mkdir lib
-        cp D:/a/_temp/msys64/mingw64/lib/libsbml* lib/
+        cp D:/a/_temp/msys64/mingw64/lib/libsbml-static.a D:/a/_temp/msys64/mingw64/lib/libzdll.a D:/a/_temp/msys64/mingw64/lib/liblibbz2.a D:/a/_temp/msys64/mingw64/lib/libxml2.a lib/
         mkdir include
         cp -r D:/a/_temp/msys64/mingw64/include/sbml/ include/
         tar -zcvf ../libSBML-5.20.5-win64.tar.gz *
