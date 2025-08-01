@@ -55,6 +55,12 @@ jobs:
         cp -r /usr/include/sbml/ include/
         tar -zcvf ../libSBML-5.20.4-linux64.tar.gz *
       
+        
+    - name: Inspect libraries
+      run: |
+        ldd /usr/lib/libsbml-static.a
+        readelf -d /usr/lib/libsbml-static.a | grep NEEDED
+        
     - uses: actions/upload-artifact@v4
       with:
         name: libSBML-5.20.4-linux64
