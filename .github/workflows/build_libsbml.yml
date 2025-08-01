@@ -218,8 +218,13 @@ jobs:
         wget https://github.com/sbmlteam/libsbml/archive/refs/tags/v5.20.5.tar.gz
         tar -zxf v5.20.5.tar.gz
         cd libsbml-5.20.5
+        
+        #Hacky fix for gcc 15
+        sed -i '10i #include <cstdint>' ./src/sbml/html2md/html2md.h
+
         mkdir build
-        cd build
+        cd build        
+        
         cmake  -G"MSYS Makefiles" \
           -DCMAKE_INSTALL_PREFIX=/mingw64/ \
           -DCMAKE_INSTALL_LIBDIR=/mingw64/lib \
