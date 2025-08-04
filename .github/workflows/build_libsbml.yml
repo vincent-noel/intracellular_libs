@@ -271,11 +271,11 @@ jobs:
           -DCMAKE_C_COMPILER=gcc \
           -DCMAKE_INSTALL_PREFIX=/mingw64 \
           -DWITH_LIBXML=ON \
-          -DWITH_ZLIB=OFF \
+          -DWITH_ZLIB=ON \
           -DWITH_ICONV=ON \
           -DWITH_BZIP2=ON \
           -DWITH_CHECK=OFF \
-          -DLIBXML2_WITH_ZLIB=OFF
+          -DLIBXML2_WITH_ZLIB=ON
         cmake --build build --parallel 4 -v
         cmake --install build
     
