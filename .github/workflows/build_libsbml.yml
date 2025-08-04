@@ -267,6 +267,8 @@ jobs:
         cd libSBML-dependencies
         cmake -G"MSYS Makefiles" -B build -S . \
           -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_CXX_COMPILER=g++ \
+          -DCMAKE_C_COMPILER=gcc \
           -DCMAKE_INSTALL_PREFIX=/mingw64 \
           -DWITH_LIBXML=ON \
           -DWITH_ZLIB=OFF \
