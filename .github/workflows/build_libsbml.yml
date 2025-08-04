@@ -274,7 +274,7 @@ jobs:
           -DWITH_BZIP2=ON \
           -DWITH_CHECK=OFF \
           -DLIBXML2_WITH_ZLIB=ON
-        cmake --build build --parallel 4
+        cmake --build build --parallel 4 -v
         cmake --install build
     
         
@@ -309,7 +309,7 @@ jobs:
           -DENABLE_DISTRIB=ON \
           -DBUILD_SHARED_LIBS=OFF \
           ..
-        make 
+        make VERBOSE=1 -j 4
         make install
         cd ..
         mkdir package
