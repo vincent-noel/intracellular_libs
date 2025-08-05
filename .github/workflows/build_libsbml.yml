@@ -317,7 +317,7 @@ jobs:
         mkdir package
         cd package
         mkdir lib
-        cp D:/a/_temp/msys64/mingw64/lib/libsbml-static.a D:/a/_temp/msys64/mingw64/lib/liblibbz2.a D:/a/_temp/msys64/mingw64/lib/libxml2.a lib/
+        cp D:/a/_temp/msys64/mingw64/lib/libsbml-static.a D:/a/_temp/msys64/mingw64/lib/liblibbz2.a D:/a/_temp/msys64/mingw64/lib/libzdll.a D:/a/_temp/msys64/mingw64/lib/libxml2.a lib/
         mkdir include
         cp -r D:/a/_temp/msys64/mingw64/include/sbml/ include/
         tar -zcvf ../libSBML-5.20.5-win64.tar.gz *
