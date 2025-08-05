@@ -14,6 +14,7 @@ jobs:
           {image: ubuntu-22.04, glibc: "2.35"}, 
           {image: ubuntu-24.04, glibc: "2.39"}
         ]
+      fail-fast: false
     runs-on: ${{ matrix.os.image }}
     
     steps:
@@ -97,6 +98,7 @@ jobs:
           {image: macos-14, gcc: "13", macosx_deployment_target: "14.0", name: osx-14-arm64}, 
           {image: macos-15, gcc: "14", macosx_deployment_target: "15.0", name: osx-15-arm64}
         ]
+      fail-fast: false
     runs-on: ${{ matrix.os }}
     env:
       CC: gcc-${{ matrix.os.gcc }}
@@ -176,6 +178,7 @@ jobs:
     strategy:
       matrix:
         os: [windows-2022, windows-2025]
+      fail-fast: false
     runs-on: ${{ matrix.os }}
 
     defaults:

@@ -14,6 +14,7 @@ jobs:
           {image: ubuntu-22.04, glibc: "2.35"},
           {image: ubuntu-24.04, glibc: "2.39"}
         ]
+      fail-fast: false
     runs-on: ${{ matrix.os.image }}
     
     steps:
@@ -61,7 +62,7 @@ jobs:
     - uses: actions/upload-artifact@v4
       with:
         name: Clp-1.17.10-linux64-glibc${{ matrix.os.glibc }}
-        path: ${{ github.workspace }}/Clp-releases-1.17.10/package/*
+        path: ${{ github.workspace }}Z/Clp-releases-1.17.10/package/*
           
     - uses: actions/upload-release-asset@v1
       if: github.event_name == 'release'
@@ -81,6 +82,7 @@ jobs:
           {image: macos-14, gcc: "13", macosx_deployment_target: "14.0", name: osx-14-arm64}, 
           {image: macos-15, gcc: "14", macosx_deployment_target: "15.0", name: osx-15-arm64}
         ]
+      fail-fast: false
     runs-on: ${{ matrix.os }}
     env:
       CC: gcc-${{ matrix.os.gcc }}
@@ -154,8 +156,12 @@ jobs:
   build_windows:
     strategy:
       matrix:
-        os: [windows-2022, windows-2025]
-    runs-on: ${{ matrix.os }}
+        os: [
+          {image: windows-2022, disk: d, name: 2022},
+          {image: windows-2025, disk: c, name: 2025}
+        ]
+      fail-fast: false
+    runs-on: ${{ matrix.os.image }}
     
     defaults:
       run:
@@ -176,7 +182,7 @@ jobs:
         wget https://github.com/coin-or/CoinUtils/archive/refs/tags/releases/2.11.12.tar.gz
         tar -zxf 2.11.12.tar.gz
         cd CoinUtils-releases-2.11.12
-        ./configure --enable-static --prefix=${{ github.workspace }}/CoinUtils-releases-2.11.12
+        ./configure --enable-static --prefix=/${{ matrix.os.disk }}/a/intracellular_libs/intracellular_libs/CoinUtils-releases-2.11.12
         make -j 4
         make install
         
@@ -186,9 +192,9 @@ jobs:
         tar -zxf 0.108.11.tar.gz
         cd Osi-releases-0.108.11
         ./configure --enable-static \
-          --prefix=${{ github.workspace }}/Osi-releases-0.108.11 \
-          --with-coinutils-lib=${{ github.workspace }}/CoinUtils-releases-2.11.12/lib/libCoinUtils.la \
-          --with-coinutils-incdir=${{ github.workspace }}/CoinUtils-releases-2.11.12/include/coin
+          --prefix=/${{ matrix.os.disk }}/a/intracellular_libs/intracellular_libs/Osi-releases-0.108.11 \
+          --with-coinutils-lib=/${{ matrix.os.disk }}/a/intracellular_libs/intracellular_libs/CoinUtils-releases-2.11.12/lib/libCoinUtils.la \
+          --with-coinutils-incdir=/${{ matrix.os.disk }}/a/intracellular_libs/intracellular_libs/CoinUtils-releases-2.11.12/include/coin
         make -j 4
         make install
 
@@ -198,26 +204,26 @@ jobs:
         tar -zxf 1.17.10.tar.gz
         cd Clp-releases-1.17.10
         ./configure --enable-static \
-          --prefix=${{ github.workspace }}/Clp-releases-1.17.10 \
-          --with-coinutils-lib=${{ github.workspace }}/CoinUtils-releases-2.11.12/lib/libCoinUtils.la \
-          --with-coinutils-incdir=${{ github.workspace }}/CoinUtils-releases-2.11.12/include/coin \
-          --with-osi-lib=${{ github.workspace }}/Osi-releases-0.108.11/lib/libOsi.la \
-          --with-osi-incdir=${{ github.workspace }}/Osi-releases-0.108.11/include/coin
+          --prefix=/${{ matrix.os.disk }}/a/intracellular_libs/intracellular_libs/Clp-releases-1.17.10 \
+          --with-coinutils-lib=/${{ matrix.os.disk }}/a/intracellular_libs/intracellular_libs/CoinUtils-releases-2.11.12/lib/libCoinUtils.la \
+          --with-coinutils-incdir=/${{ matrix.os.disk }}/a/intracellular_libs/intracellular_libs/CoinUtils-releases-2.11.12/include/coin \
+          --with-osi-lib=/${{ matrix.os.disk }}/a/intracellular_libs/intracellular_libs/Osi-releases-0.108.11/lib/libOsi.la \
+          --with-osi-incdir=/${{ matrix.os.disk }}/a/intracellular_libs/intracellular_libs/Osi-releases-0.108.11/include/coin
         make -j 4
         make install
         mkdir package
         cd package
-        cp -r ${{ github.workspace }}/Clp-releases-1.17.10/lib .
-        cp -r ${{ github.workspace }}/CoinUtils-releases-2.11.12/lib/* lib/
-        cp -r ${{ github.workspace }}/Osi-releases-0.108.11/lib/* lib/
-        cp -r ${{ github.workspace }}/Clp-releases-1.17.10/include .
-        cp -r ${{ github.workspace }}/CoinUtils-releases-2.11.12/include/* include/
-        cp -r ${{ github.workspace }}/Osi-releases-0.108.11/include/* include/
+        cp -r /${{ matrix.os.disk }}/a/intracellular_libs/intracellular_libs/Clp-releases-1.17.10/lib .
+        cp -r /${{ matrix.os.disk }}/a/intracellular_libs/intracellular_libs/CoinUtils-releases-2.11.12/lib/* lib/
+        cp -r /${{ matrix.os.disk }}/a/intracellular_libs/intracellular_libs/Osi-releases-0.108.11/lib/* lib/
+        cp -r /${{ matrix.os.disk }}/a/intracellular_libs/intracellular_libs/Clp-releases-1.17.10/include .
+        cp -r /${{ matrix.os.disk }}/a/intracellular_libs/intracellular_libs/CoinUtils-releases-2.11.12/include/* include/
+        cp -r /${{ matrix.os.disk }}/a/intracellular_libs/intracellular_libs/Osi-releases-0.108.11/include/* include/
         tar -zcvf ../Clp-1.17.10-win64-${{ matrix.os.name }}.tar.gz *
 
     - uses: actions/upload-artifact@v4
       with:
-        name: Clp-1.17.10-win64-${{ matrix.os }}
+        name: Clp-1.17.10-win64-${{ matrix.os.name }}
         path: ${{ github.workspace }}\Clp-releases-1.17.10\package\*
 
     - uses: actions/upload-release-asset@v1
@@ -226,6 +232,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ github.event.release.upload_url }}
-        asset_name: Clp-1.17.10-win64-${{ matrix.os }}.tar.gz
-        asset_path: ${{ github.workspace }}\Clp-releases-1.17.10\Clp-1.17.10-win64-${{ matrix.os }}.tar.gz
+        asset_name: Clp-1.17.10-win64-${{ matrix.os.name }}.tar.gz
+        asset_path: ${{ github.workspace }}\Clp-releases-1.17.10\Clp-1.17.10-win64-${{ matrix.os.name }}.tar.gz
         asset_content_type: application/gzip
