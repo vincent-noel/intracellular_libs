@@ -76,7 +76,7 @@ jobs:
     - uses: actions/upload-artifact@v4
       with:
         name: libSBML-5.20.5-linux64-glibc${{ matrix.os.glibc }}
-        path: /home/runner/work/intracellular_libs/intracellular_libs/libsbml-5.20.5/package/*
+        path: ${{ github.workspace }}/libsbml-5.20.5/package/*
           
       
     - uses: actions/upload-release-asset@v1
@@ -86,11 +86,22 @@ jobs:
       with:
         upload_url: ${{ github.event.release.upload_url }}
         asset_name: libSBML-5.20.5-linux64-glibc${{ matrix.os.glibc }}.tar.gz
-        asset_path: /home/runner/work/intracellular_libs/intracellular_libs/libsbml-5.20.5/libSBML-5.20.5-linux64-glibc${{ matrix.os.glibc }}.tar.gz
-        asset_content_type: application/gzip   
-               
+        asset_path: ${{ github.workspace }}/libsbml-5.20.5/libSBML-5.20.5-linux64-glibc${{ matrix.os.glibc }}.tar.gz
+        asset_content_type: application/gzip
+
   build_macosx:
-    runs-on: macos-13
+    strategy:
+      matrix:
+        os: [
+          {image: macos-13, gcc: "12", macosx_deployment_target: "13.0", name: osx-x86_64}, 
+          {image: macos-14, gcc: "13", macosx_deployment_target: "14.0", name: osx-14-arm64}, 
+          {image: macos-15, gcc: "14", macosx_deployment_target: "15.0", name: osx-15-arm64}
+        ]
+    runs-on: ${{ matrix.os }}
+    env:
+      CC: gcc-${{ matrix.os.gcc }}
+      CXX: g++-${{ matrix.os.gcc }}
+      MACOSX_DEPLOYMENT_TARGET: ${{ matrix.os.macosx_deployment_target }}
     
     steps:
     - uses: actions/checkout@v4
@@ -101,8 +112,6 @@ jobs:
         cd libSBML-dependencies
         cmake -B build -S . \
           -DCMAKE_BUILD_TYPE=Release \
-          -DCMAKE_CXX_COMPILER=g++-12 \
-          -DCMAKE_C_COMPILER=gcc-12 \
           -DCMAKE_INSTALL_PREFIX=/usr/local/ \
           -DWITH_LIBXML=ON \
           -DWITH_ZLIB=ON \
@@ -114,8 +123,6 @@ jobs:
         sudo cmake --install build
           
     - name: Compile libSBML
-      env: 
-        MACOSX_DEPLOYMENT_TARGET: 13.0
       run: |
         wget https://github.com/sbmlteam/libsbml/archive/refs/tags/v5.20.5.tar.gz
         tar -zxf v5.20.5.tar.gz
@@ -124,8 +131,6 @@ jobs:
         cd build
         cmake -DCMAKE_INSTALL_PREFIX=/usr/local/ \
         -DCMAKE_INSTALL_LIBDIR=/usr/local/lib/ \
-        -DCMAKE_CXX_COMPILER=g++-12 \
-        -DCMAKE_C_COMPILER=gcc-12 \
         -DCMAKE_CXX_STANDARD_LIBRARIES=-lxml2 \
         -DWITH_SWIG=OFF \
         -DLIBXML_LIBRARY=/usr/local/lib/libxml2.a \
@@ -150,105 +155,29 @@ jobs:
         cp /usr/local/lib/libsbml-static.a /usr/local/lib/libzlib.a /usr/local/lib/libbz2.a /usr/local/lib/libxml2.a lib/
         mkdir include
         cp -r /usr/local/include/sbml include/
-        tar -zcvf ../libSBML-5.20.5-osx-x86_64.tar.gz *
+        tar -zcvf ../libSBML-5.20.5-${{ matrix.os.name }}.tar.gz *
 
     - uses: actions/upload-artifact@v4
       with:
-        name: libSBML-5.20.5-osx-x86_64
-        path: /Users/runner/work/intracellular_libs/intracellular_libs/libsbml-5.20.5/package/*
-        
-      
+        name: libSBML-5.20.5-${{ matrix.os.name }}
+        path: ${{ github.workspace }}/libsbml-5.20.5/package/*
+
     - uses: actions/upload-release-asset@v1
       if: github.event_name == 'release'
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ github.event.release.upload_url }}
-        asset_name: libSBML-5.20.5-osx-x86_64.tar.gz
-        asset_path: /Users/runner/work/intracellular_libs/intracellular_libs/libsbml-5.20.5/libSBML-5.20.5-osx-x86_64.tar.gz
+        asset_name: libSBML-5.20.5-${{ matrix.os.name }}.tar.gz
+        asset_path: ${{ github.workspace }}/libsbml-5.20.5/libSBML-5.20.5-${{ matrix.os.name }}.tar.gz
         asset_content_type: application/gzip   
-        
-  build_macosx_m1:
-    runs-on: macos-14
-    
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Compile libSBML dependencies
-      run: |
-        git clone --recurse-submodules https://github.com/sbmlteam/libSBML-dependencies
-        cd libSBML-dependencies
-        cmake -B build -S . \
-          -DCMAKE_BUILD_TYPE=Release \
-          -DCMAKE_INSTALL_PREFIX=/usr/local \
-          -DCMAKE_CXX_COMPILER=g++-13 \
-          -DCMAKE_C_COMPILER=gcc-13 \
-          -DWITH_LIBXML=ON \
-          -DWITH_ZLIB=ON \
-          -DWITH_ICONV=ON \
-          -DWITH_BZIP2=ON \
-          -DWITH_CHECK=OFF \
-          -DLIBXML2_WITH_ZLIB=ON
-        cmake --build build --parallel 4
-        sudo cmake --install build
-    
-    - name: Compile libSBML
-      env: 
-        MACOSX_DEPLOYMENT_TARGET: 14.0
-      run: |
-        wget https://github.com/sbmlteam/libsbml/archive/refs/tags/v5.20.5.tar.gz
-        tar -zxf v5.20.5.tar.gz
-        cd libsbml-5.20.5
-        mkdir build
-        cd build
-        cmake -DCMAKE_INSTALL_PREFIX=/usr/local/ \
-        -DCMAKE_INSTALL_LIBDIR=/usr/local/lib/ \
-        -DCMAKE_CXX_COMPILER=g++-13 \
-        -DCMAKE_C_COMPILER=gcc-13 \
-        -DCMAKE_CXX_STANDARD_LIBRARIES=-lxml2 \
-        -DWITH_SWIG=OFF \
-        -DLIBXML_LIBRARY=/usr/local/lib/libxml2.a \
-        -DLIBXML_INCLUDE_DIR=/usr/local/include/libxml2/ \
-        -DENABLE_COMP=ON \
-        -DENABLE_FBC=ON \
-        -DENABLE_GROUPS=ON \
-        -DENABLE_LAYOUT=ON \
-        -DENABLE_MULTI=ON \
-        -DENABLE_QUAL=ON \
-        -DENABLE_RENDER=ON \
-        -DENABLE_DISTRIB=ON \
-        -DWITH_CPP_NAMESPACE=ON \
-        -DBUILD_SHARED_LIBS=OFF \
-        ..
-        make -j 3
-        sudo make install
-        cd ..
-        mkdir package
-        cd package
-        mkdir lib
-        cp /usr/local/lib/libsbml-static.a /usr/local/lib/libzlib.a /usr/local/lib/libbz2.a /usr/local/lib/libxml2.a lib/
-        mkdir include
-        cp -r /usr/local/include/sbml include/
-        tar -zcvf ../libSBML-5.20.5-osx-arm64.tar.gz *
-        
-    - uses: actions/upload-artifact@v4
-      with:
-        name: libSBML-5.20.5-osx-arm64
-        path: /Users/runner/work/intracellular_libs/intracellular_libs/libsbml-5.20.5/package/*
-        
-    - uses: actions/upload-release-asset@v1
-      if: github.event_name == 'release'
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ github.event.release.upload_url }}
-        asset_name: libSBML-5.20.5-osx-arm64.tar.gz
-        asset_path: /Users/runner/work/intracellular_libs/intracellular_libs/libsbml-5.20.5/libSBML-5.20.5-osx-arm64.tar.gz
-        asset_content_type: application/gzip   
-                        
+                  
   build_windows:
-    runs-on: windows-latest
-    
+    strategy:
+      matrix:
+        os: [windows-2022, windows-2025]
+    runs-on: ${{ matrix.os }}
+
     defaults:
       run:
         shell: msys2 {0}
@@ -318,15 +247,15 @@ jobs:
         mkdir package
         cd package
         mkdir lib
-        cp D:/a/_temp/msys64/mingw64/lib/libsbml-static.a D:/a/_temp/msys64/mingw64/lib/liblibbz2.a D:/a/_temp/msys64/mingw64/lib/libzdll.a D:/a/_temp/msys64/mingw64/lib/libxml2.a lib/
+        cp /mingw64/lib/libsbml-static.a /mingw64/lib/liblibbz2.a /mingw64/lib/libzdll.a /mingw64/lib/libxml2.a lib/
         mkdir include
-        cp -r D:/a/_temp/msys64/mingw64/include/sbml/ include/
-        tar -zcvf ../libSBML-5.20.5-win64.tar.gz *
-        
+        cp -r /mingw64/include/sbml/ include/
+        tar -zcvf ../libSBML-5.20.5-win64-${{ matrix.os.name }}.tar.gz *
+
     - uses: actions/upload-artifact@v4
       with:
-        name: libSBML-5.20.5-win64
-        path: D:\a\intracellular_libs\intracellular_libs/libsbml-5.20.5/package/*
+        name: libSBML-5.20.5-win64-${{ matrix.os.name }}
+        path: ${{ github.workspace }}\libsbml-5.20.5\package\*
         
     - uses: actions/upload-release-asset@v1
       if: github.event_name == 'release'
@@ -334,6 +263,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ github.event.release.upload_url }}
-        asset_name: libSBML-5.20.5-win64.tar.gz
-        asset_path: D:\a\intracellular_libs\intracellular_libs\libsbml-5.20.5\libSBML-5.20.5-win64.tar.gz
-        asset_content_type: application/gzip     
+        asset_name: libSBML-5.20.5-win64-${{ matrix.os }}.tar.gz
+        asset_path: ${{ github.workspace }}\libsbml-5.20.5\libSBML-5.20.5-win64-${{ matrix.os }}.tar.gz
+        asset_content_type: application/gzip
