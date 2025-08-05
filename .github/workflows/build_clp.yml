@@ -83,7 +83,7 @@ jobs:
           {image: macos-15, gcc: "14", macosx_deployment_target: "15.0", name: osx-15-arm64}
         ]
       fail-fast: false
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.os.image }}
     env:
       CC: gcc-${{ matrix.os.gcc }}
       CXX: g++-${{ matrix.os.gcc }}
