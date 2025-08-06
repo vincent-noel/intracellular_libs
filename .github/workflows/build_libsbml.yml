@@ -108,6 +108,10 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
+    - name: Install dependencies
+      run : |
+        brew reinstall gcc
+    
     - name: Compile libSBML dependencies
       run: |
         git clone --recurse-submodules https://github.com/sbmlteam/libSBML-dependencies.git

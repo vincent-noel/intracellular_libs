@@ -94,7 +94,8 @@ jobs:
     
     - name: Install dependencies
       run : |
-        brew install libxml2 openblas lapack
+        # brew install openblas lapack
+        brew reinstall gcc
     
     - name: Compile CoinUtils
       run: |
