@@ -92,11 +92,6 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
-    - name: Install dependencies
-      run : |
-        # brew install openblas lapack
-        brew reinstall gcc
-    
     - name: Compile CoinUtils
       run: |
         wget https://github.com/coin-or/CoinUtils/archive/refs/tags/releases/2.11.12.tar.gz
