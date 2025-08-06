@@ -96,7 +96,7 @@ jobs:
         os: [
           {image: macos-13, gcc: "12", macosx_deployment_target: "13.0", name: osx-x86_64}, 
           {image: macos-14, gcc: "13", macosx_deployment_target: "14.0", name: osx-14-arm64}, 
-          {image: macos-15, gcc: "14", macosx_deployment_target: "15.0", name: osx-15-arm64}
+          {image: macos-15, gcc: "15", macosx_deployment_target: "15.0", name: osx-15-arm64}
         ]
       fail-fast: false
     runs-on: ${{ matrix.os.image }}
@@ -111,7 +111,8 @@ jobs:
     - name: Install dependencies
       if: ${{ matrix.os.name == 'osx-15-arm64' }}
       run : |
-        brew reinstall gcc@14
+        brew uninstall gcc
+        brew install gcc
     
     - name: Compile libSBML dependencies
       run: |
