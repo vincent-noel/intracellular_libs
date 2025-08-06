@@ -257,11 +257,11 @@ jobs:
         cp /mingw64/lib/libsbml-static.a /mingw64/lib/liblibbz2.a /mingw64/lib/libzdll.a /mingw64/lib/libxml2.a lib/
         mkdir include
         cp -r /mingw64/include/sbml/ include/
-        tar -zcvf ../libSBML-5.20.5-win64-${{ matrix.os.name }}.tar.gz *
+        tar -zcvf ../libSBML-5.20.5-win64-${{ matrix.os }}.tar.gz *
 
     - uses: actions/upload-artifact@v4
       with:
-        name: libSBML-5.20.5-win64-${{ matrix.os.name }}
+        name: libSBML-5.20.5-win64-${{ matrix.os }}
         path: ${{ github.workspace }}\libsbml-5.20.5\package\*
         
     - uses: actions/upload-release-asset@v1
